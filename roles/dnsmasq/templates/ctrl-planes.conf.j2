@@ -1,0 +1,6 @@
+#  control plane
+{# loop over the members of group ctrlplane from inventory #}
+{% for ctrlplane in groups['ctrlplanes'] | sort %}
+{% set ip_a_ctrlplane = hostvars[ctrlplane]['ip_a'] | ipaddr %}
+host-record={{ ctrlplane }}.{{ domain }},{{ ip_a_ctrlplane }}
+{% endfor %}

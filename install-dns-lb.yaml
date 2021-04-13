@@ -1,0 +1,8 @@
+---
+- name: install dns & lb
+  hosts: lb
+  become: yes
+  gather_facts: yes
+  roles:
+    - dnsmasq
+    - haproxy

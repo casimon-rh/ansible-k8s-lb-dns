@@ -1,0 +1,53 @@
+---
+- name: Install dnsmasq
+  package:
+    name: "dnsmasq"
+    state: present
+
+- name: Deploy dnsmasq main config
+  copy:
+    src: dnsmasq.conf
+    dest: /etc/dnsmasq.conf
+    mode: 0644
+
+- name: Deploy dnsmasq k8s config
+  template:
+    src: main.conf.j2
+    dest: /etc/dnsmasq.d/main.conf
+    mode: 0644
+
+- name: Deploy dnsmasq OpenShift configs
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/dnsmasq.d/{{ item }}"
+    mode: 0644
+  loop:
+    - crl-planes.conf
+    - workers.conf
+
+- name: Disable dns in NetworkManager
+  lineinfile:
+    path: '/etc/NetworkManager/NetworkManager.conf'
+    insertafter: "^\\[main\\]"
+    line: "dns=none"
+    state: present
+
+- name: Set resolution to itself in resolv.conf
+  shell: echo -e "search {{ domain }}\nnameserver 127.0.0.1" > /etc/resolv.conf
+  register: echo_result
+  changed_when: "echo_result.rc == 0"
+
+- name: Restart NetworkManager
+  service:
+    name: NetworkManager
+    state: restarted
+
+- name: Enable dnsmasq
+  service:
+    name: dnsmasq
+    enabled: yes
+
+- name: Start dnsmasq
+  service:
+    name: dnsmasq
+    state: restarted

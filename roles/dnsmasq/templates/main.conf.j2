@@ -1,0 +1,5 @@
+{# jinja2 template #}
+{# define variables for later use #}
+{% set ip_addr = ip_address | ipaddr('address') %}
+domain={{ domain }}
+local=/api.{{ domain }}/{{ ip_addr }}

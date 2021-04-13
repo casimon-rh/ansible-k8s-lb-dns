@@ -1,0 +1,25 @@
+---
+all:
+  hosts:
+    lb:
+      ansible_host: localhost
+      ip_address: {{ lb_ip_address }}
+  vars:
+    domain: k8s.client.com
+  children:
+    nodes:
+      children:
+        ctrlplanes:
+          hosts:
+            control-plane-0:
+              ip_a: {{ ctrl0_ip_address }}
+            control-plane-1:
+              ip_a: {{ ctrl1_ip_address }}
+            control-plane-2:
+              ip_a: {{ ctrl2_ip_address }}
+        workers:
+          hosts:
+            worker-0:
+              ip_a: {{ work0_ip_address }}
+            worker-1:
+              ip_a: {{ work1_ip_address }}

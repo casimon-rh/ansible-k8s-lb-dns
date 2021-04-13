@@ -1,0 +1,29 @@
+---
+#  tasks
+- name: Install packages for HAproxy
+  package:
+    name: haproxy
+    state: present
+
+- name: Deploy haproxy.cfg from template
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    mode: 0644
+
+- name: Set haproxy_connect_any flag on and keep it persistent across reboots
+  ansible.posix.seboolean:
+    name: haproxy_connect_any
+    state: yes
+    persistent: yes
+  when: ansible_facts.selinux.status == 'enabled'
+
+- name: enable haproxy
+  service:
+    name: haproxy
+    enabled: yes
+
+- name: start haproxy
+  service:
+    name: haproxy
+    state: restarted

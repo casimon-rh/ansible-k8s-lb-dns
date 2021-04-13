@@ -1,0 +1,6 @@
+#  workers
+{# loop over the members of group workers from inventory #}
+{% for worker in groups['workers'] | sort %}
+{% set ip_a_worker = hostvars[worker]['ip_a'] | ipaddr %}
+host-record={{ worker }}.{{ domain }},{{ ip_a_worker }}
+{% endfor %}
