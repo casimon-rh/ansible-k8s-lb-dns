@@ -1,0 +1,9 @@
+---
+all:
+  hosts:
+    k8s.master.com:
+  
+  children:
+    k8s_master:
+      hosts:
+        k8s.master.com:

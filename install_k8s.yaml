@@ -1,0 +1,7 @@
+---
+- name: install k8s
+  hosts: k8s_master
+  become: yes
+  gather_facts: yes
+  roles:
+    - common_k8s
