@@ -1,0 +1,92 @@
+---
+
+- name: Gather server facts
+  setup:
+  delegate_to: "{{ item }}"
+  delegate_facts: True
+  run_once: True
+  when: hostvars[item]['ansible_host'] is not defined
+  with_items: "{{ groups.all }}"
+
+- name: Update repositories
+  apt:
+    update_cache: yes
+
+- name: Add repositories for Cri-io
+  apt_repository:
+    repo: ppa:projectatomic/ppa
+
+- name: Add ppa key for k8s
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Add K8s repositories
+  apt_repository:
+    repo: "deb  http://apt.kubernetes.io/ kubernetes-xenial main"
+    state: present
+
+- name: Update repositories
+  apt:
+    update_cache: yes
+
+- name: Upgrade packages
+  apt:
+    upgrade: dist
+
+
+- name: Install requiered packages
+  apt:
+    pkg:
+      - vim
+      - software-properties-common
+      - cri-o-1.15
+      - kubeadm=1.19.1-00
+      - kubelet=1.19.1-00
+      - kubectl=1.19.1-00
+
+- name: Mark hold k8s packages
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - kubeadm
+    - kubelet
+    - kubectl
+
+- name: Add modprobes modules
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+
+- name: Copy configurations files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "99-kubernetes-cri.conf", dest: "/etc/sysctl.d/99-kubernetes-cri.conf" }
+    - { src: "kubelet", dest: "/etc/default/kubelet" }
+    - { src: "crio.conf" , dest: "/etc/crio/crio.conf" }
+  notify: Restart services
+
+- name: Update sysctl
+  shell: sysctl --system
+  
+- name: Enable services
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+  loop:
+    - crio
+
+- name: Add IP address of all hosts to all hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item].ansible_default_ipv4['address'] }} {{item}}"
+    state: present
+  become: yes
+  with_items: "{{ groups.all }}"
