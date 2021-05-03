@@ -1,0 +1,26 @@
+---
+
+- name: Create k8s folder
+  file:
+    path: /root/k8s
+    mode: '0764'
+    state: directory
+
+- name: Templates
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: calico.yaml.j2 , dest: /root/k8s/calico.yaml }
+    - { src: kubeadm-config.yaml.j2 , dest: /root/k8s/kubeadm-config.yaml }
+  when: "inventory_hostname in groups['k8s_main_master']"
+
+
+- name : Run kubeadm
+  shell: |
+    kubeadm init --config=/root/k8s/kubeadm-config.yaml --upload-certs | tee kubeadm-init.out   
+  register: kubeadm_master
+  when: "inventory_hostname in groups['k8s_main_master']"
+
+
+
