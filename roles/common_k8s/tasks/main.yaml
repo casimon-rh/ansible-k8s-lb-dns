@@ -1,4 +1,13 @@
 ---
+
+- name: Gather server facts
+  setup:
+  delegate_to: "{{ item }}"
+  delegate_facts: True
+  run_once: True
+  when: hostvars[item]['ansible_host'] is not defined
+  with_items: "{{ groups.all }}"
+
 - name: Update repositories
   apt:
     update_cache: yes
@@ -72,8 +81,12 @@
     enabled: yes
   loop:
     - crio
-#- name: Download calico
-#  get_url:
-#    url: https://docs.projectcalico.org/manifests/calico.yaml
-#    dest: /calico.yaml
-#    mode: '0440'
+
+- name: Add IP address of all hosts to all hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item].ansible_default_ipv4['address'] }} {{item}}"
+    state: present
+  become: yes
+  with_items: "{{ groups.all }}"

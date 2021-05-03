@@ -1,9 +1,17 @@
 ---
 all:
   hosts:
-    k8s.master.com:
+    node01.k8s.reyesmtz.com:
+    master01.k8s.reyesmtz.com:
   
   children:
     k8s_master:
+      children:
+        k8s_main_master:
+          hosts:
+            master01.k8s.reyesmtz.com:
       hosts:
-        k8s.master.com:
+        master01.k8s.reyesmtz.com:
+    k8s_worker:
+      host:
+        node01.k8s.reyesmtz.com:
