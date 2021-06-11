@@ -1,0 +1,15 @@
+---
+- name: Replace cloud
+  blockinfile:
+    insertbefore: "    version: 2"
+    path: /etc/netplan/50-cloud-init.yaml
+    block: |
+      # specific dns
+                  nameservers:
+                      search: [{{ domain }}, ec2.internal]
+                      addresses: [{{ internaldns }}]
+                  dhcp4-overrides:
+                    use-dns: false
+- name: Netplan apply
+  shell: "netplan apply"
+...

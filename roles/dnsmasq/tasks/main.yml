@@ -1,8 +1,17 @@
 ---
+- name: Update
+  apt:
+    update_cache: yes
+
+- name: Upgrade all
+  apt:
+    name: "*"
+    state: latest
+
 - name: Install dnsmasq
-  package:
+  apt:
     name: "dnsmasq"
-    state: present
+    state: latest
 
 - name: Deploy dnsmasq main config
   copy:
@@ -16,31 +25,35 @@
     dest: /etc/dnsmasq.d/main.conf
     mode: 0644
 
-- name: Deploy dnsmasq OpenShift configs
+- name: Deploy dnsmasq K8s configs
   template:
     src: "{{ item }}.j2"
     dest: "/etc/dnsmasq.d/{{ item }}"
     mode: 0644
   loop:
-    - crl-planes.conf
+    - ctrl-planes.conf
     - workers.conf
+#! UBUNTU HAS NETPLAN
+# - name: Populate service facts
+#   service_facts:
 
-- name: Disable dns in NetworkManager
-  lineinfile:
-    path: '/etc/NetworkManager/NetworkManager.conf'
-    insertafter: "^\\[main\\]"
-    line: "dns=none"
-    state: present
+# - name: Disable dns in NetworkManager
+#   lineinfile:
+#     path: '/etc/NetworkManager/NetworkManager.conf'
+#     insertafter: "^\\[main\\]"
+#     line: "dns=none"
+#     state: present
+#   when: "'NetworkManager' in services"
 
-- name: Set resolution to itself in resolv.conf
-  shell: echo -e "search {{ domain }}\nnameserver 127.0.0.1" > /etc/resolv.conf
-  register: echo_result
-  changed_when: "echo_result.rc == 0"
+# - name: Set resolution to itself in resolv.conf
+#   shell: echo -e "search {{ domain }}\nnameserver 127.0.0.1" > /etc/resolv.conf
+#   register: echo_result
+#   changed_when: "echo_result.rc == 0"
 
-- name: Restart NetworkManager
-  service:
-    name: NetworkManager
-    state: restarted
+# - name: Restart NetworkManager
+#   service:
+#     name: NetworkManager
+#     state: restarted
 
 - name: Enable dnsmasq
   service:

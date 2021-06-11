@@ -1,1 +1,4 @@
 inventory.yaml
+*.pem
+fact_cache/
+inventory-k8s.ini

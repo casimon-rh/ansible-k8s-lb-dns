@@ -1,13 +1,15 @@
 ---
-- name: install packages
-  hosts: all
+- name: install k8s with crio
+  hosts: ctrls,wrks
   become: yes
   gather_facts: yes
   roles:
+    - hostname
+    - cloud_init
     - common_k8s
 
 - name: install k8s
-  hosts: all
+  hosts: ctrls
   become: yes
   gather_facts: yes
   roles:

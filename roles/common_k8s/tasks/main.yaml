@@ -1,13 +1,5 @@
 ---
 
-- name: Gather server facts
-  setup:
-  delegate_to: "{{ item }}"
-  delegate_facts: True
-  run_once: True
-  when: hostvars[item]['ansible_host'] is not defined
-  with_items: "{{ groups.all }}"
-
 - name: Update repositories
   apt:
     update_cache: yes
@@ -82,11 +74,3 @@
   loop:
     - crio
 
-- name: Add IP address of all hosts to all hosts
-  lineinfile:
-    dest: /etc/hosts
-    regexp: '.*{{ item }}$'
-    line: "{{ hostvars[item].ansible_default_ipv4['address'] }} {{item}}"
-    state: present
-  become: yes
-  with_items: "{{ groups.all }}"

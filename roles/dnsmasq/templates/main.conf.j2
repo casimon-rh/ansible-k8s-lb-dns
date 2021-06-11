@@ -3,3 +3,4 @@
 {% set ip_addr = ip_address | ipaddr('address') %}
 domain={{ domain }}
 local=/api.{{ domain }}/{{ ip_addr }}
+host-record=api.{{ domain }},{{ ip_addr }}

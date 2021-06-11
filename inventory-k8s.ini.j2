@@ -1,0 +1,17 @@
+[ctrls]
+{{ctrl0-pubip}} hostname=control-plane-0 ip_a={{ctrl0-privip}}
+{{ctrl1-pubip}} hostname=control-plane-1 ip_a={{ctrl1-privip}}
+{{ctrl2-pubip}} hostname=control-plane-2 ip_a={{ctrl2-privip}}
+
+[wrks]
+{{work0-pubip}} hostname=worker-0 ip_a={{work0-privip}}
+{{work1-pubip}} hostname=worker-1 ip_a={{work1-privip}}
+
+[lb]
+{{lb-pubvip}} hostname=haproxy-0 ip_a={{lb-privip}}
+
+[all:vars]
+domain = k8s.client.com
+ansible_user = ubuntu
+ansible_ssh_private_key_file = {{pem}}
+internaldns = {{lb-privip}}
